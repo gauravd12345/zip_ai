@@ -1,14 +1,10 @@
-import { useState } from "react";
-import CircleBoardOverlay from "./CircleBoardOverlay";
+import { useState, useEffect } from "react";
+import { validMoves, createTrees } from "./GeneratedTree";
 
-const Board = () => {
-  const [selectedCells, setSelectedCells] = useState(Array(16).fill(0));
+const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
   const [counter, setCounter] = useState(1);
-  const [isMouseDown, setIsMouseDown] = useState(false);
-  const [direction, setDirection] = useState({});
-  const [prevSelected, setPrevSelected] = useState(null);
 
-  const drawCell = (index, dir) => {
+  const drawCell = (index) => {
     setSelectedCells((prev) => {
       if (prev[index] !== 0) return prev;
       const updated = [...prev];
@@ -16,66 +12,66 @@ const Board = () => {
       setCounter(counter + 1);
       return updated;
     });
-    setPrevSelected(index);
-    setDirection((prevDir) => ({ ...prevDir, [index]: dir }));
   };
 
-  const handleMouseDown = (index) => {
-    setIsMouseDown(true);
-    drawCell(index, null);
-  };
+  useEffect(() => {
+    const startIndex = selectedCells.indexOf(1);
+    if (startIndex !== -1) {
+      searchTree([startIndex], gridSize, 3, selectedCells);
+    }
+  }, [selectedCells, gridSize]); 
 
-  const handleMouseEnter = (index) => {
-    if (!isMouseDown || selectedCells[index] !== 0) return;
+  function searchTree(startIndices, gridSize, iterations, tree) {
+    if (iterations === 0) return;
 
-    const prev = prevSelected;
-    const delta = index - prev;
-    let dir = "";
+    let newStartIndices = [];
+    let newTree = [...tree];
 
-    if (delta === 1) dir = "right";
-    else if (delta === -1) dir = "left";
-    else if (delta === 4) dir = "down";
-    else if (delta === -4) dir = "up";
+    for (let i = 0; i < startIndices.length; i++) {
+      const moves = validMoves(startIndices[i], gridSize);
+      const [trees, indices] = createTrees(newTree, startIndices[i], moves, gridSize);
+      newStartIndices.push(...indices);
 
-    drawCell(index, dir);
-  };
+      // EDIT THIS
+      newTree = trees[0];
+      
+    }
 
-  const handleMouseUp = () => {
-    setIsMouseDown(false);
-  };
+    setSelectedCells(newTree);
+
+
+    setTimeout(() => {
+      searchTree(newStartIndices, gridSize, iterations - 1, newTree);
+    }, 500); 
+  }
 
   return (
-    <div
-      className="flex flex-wrap w-60 select-none"
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-    >
-      {[...Array(4)].flatMap((_, rowIndex) =>
-        [...Array(4)].map((_, colIndex) => {
-          const index = rowIndex * 4 + colIndex;
+    <div className="flex flex-wrap w-60 select-none">
+      {[...Array(gridSize)].flatMap((_, rowIndex) =>
+        [...Array(gridSize)].map((_, colIndex) => {
+          const index = rowIndex * gridSize + colIndex;
           const isSelected = selectedCells[index];
 
           return (
             <div
               key={index}
-              onMouseDown={() => handleMouseDown(index)}
-              onMouseEnter={() => handleMouseEnter(index)}
+              onClick={() => drawCell(index)}
               className="relative w-15 h-15 border border-white text-black text-xl font-bold cursor-pointer flex items-center justify-center"
             >
-              
-              {isSelected !== 0 && <CircleBoardOverlay dir={direction[index]} />}
-
               {isSelected !== 0 && (
-                <span className="z-10 relative">{isSelected}</span>
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
+                  {isSelected === "." ? (
+                    <div className="w-12 h-12 bg-green-500" />
+                  ) : (
+                    <div className="w-12 h-12 bg-red-500" />
+                  )}
+                </div>
               )}
+              {isSelected !== 0 && <span className="z-10 relative">{isSelected}</span>}
             </div>
           );
         })
       )}
-
-      <button className="mt-4 ml-2 px-4 py-2 bg-black text-white rounded">
-        Start
-      </button>
     </div>
   );
 };
