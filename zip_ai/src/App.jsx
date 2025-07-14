@@ -4,12 +4,14 @@ import Board from './components/Board'
 
 
 function App() {
-  const gridSize = 4;
+  const gridSize = 3;
   const [selectedCells, setSelectedCells] = useState(Array(gridSize * gridSize).fill(0));
+
 
   return (
     <div>
       <Board gridSize={gridSize} selectedCells={selectedCells} setSelectedCells={setSelectedCells}/>
+      
     </div>
     
   )

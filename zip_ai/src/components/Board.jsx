@@ -14,39 +14,39 @@ const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
     });
   };
 
-  useEffect(() => {
-    const startIndex = selectedCells.indexOf(1);
-    if (startIndex !== -1) {
-      searchTree([startIndex], gridSize, 3, selectedCells);
+  // Finding the initial starting index
+  let startIndex = -1;
+  for(let i = 0; i < selectedCells.length; i++){
+    if(selectedCells[i] == 1){
+      startIndex = i;
     }
-  }, [selectedCells, gridSize]); 
+  }
 
-  function searchTree(startIndices, gridSize, iterations, tree) {
-    if (iterations === 0) return;
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-    let newStartIndices = [];
-    let newTree = [...tree];
-
-    for (let i = 0; i < startIndices.length; i++) {
-      const moves = validMoves(startIndices[i], gridSize);
-      const [trees, indices] = createTrees(newTree, startIndices[i], moves, gridSize);
-      newStartIndices.push(...indices);
-
-      // EDIT THIS
-      newTree = trees[0];
-      
+  async function searchTree(startIndices, gridSize, iterations, tree) {
+    console.log(startIndices, iterations);
+    if (iterations == 0){
+      setSelectedCells([...tree]);
+      return;
     }
+    const moves = validMoves(tree, startIndices[0], gridSize)
+    const [newTrees, newIndicies] = createTrees(tree, startIndices[0], moves, gridSize);
 
-    setSelectedCells(newTree);
+    console.log(newTrees[0], newIndicies[0]);
+    for(let i = 0; i < newIndicies.length; i++){
+      searchTree([newIndicies[i]], gridSize, iterations - 1, newTrees[i]);
+      await delay(5000);
 
+    }
+    
 
-    setTimeout(() => {
-      searchTree(newStartIndices, gridSize, iterations - 1, newTree);
-    }, 500); 
   }
 
   return (
-    <div className="flex flex-wrap w-60 select-none">
+    <div className="flex flex-wrap w-50 select-none">
       {[...Array(gridSize)].flatMap((_, rowIndex) =>
         [...Array(gridSize)].map((_, colIndex) => {
           const index = rowIndex * gridSize + colIndex;
@@ -72,6 +72,8 @@ const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
           );
         })
       )}
+
+      <button className="my-5 mx-auto " onClick={() => searchTree([startIndex], gridSize, 3, selectedCells)}>Start</button>
     </div>
   );
 };
