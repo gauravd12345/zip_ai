@@ -1,62 +1,58 @@
 
+export function createNewTree(tree, index, move, gridSize){
+  const treeCopy = [...tree];
+  let newIndex = index;
+  let arrow = null;
 
-export function createTrees(tree, index, moves, gridSize){
-  let newTrees = [];
-  let newIndicies = [];
-  for(let i = 0; i < moves.length; i++){
-    const treeCopy = [...tree];
-    const [newTree, newIndex] = createNewTree(treeCopy, index, moves[i], gridSize);
-    newTrees.push(newTree);
-    newIndicies.push(newIndex);
-
-  }
-  
-  return [newTrees, newIndicies];
-  
-}
-
-function createNewTree(tree, index, move, gridSize){
-  let newIndex = 0;
-  if(move == "up"){
-    tree[index - gridSize] = "↑";
+  if (move === "up") {
     newIndex = index - gridSize;
-
-  }
-  else if(move == "down"){
-    tree[index + gridSize] = "↓";
+    if (treeCopy[newIndex] === 0) {
+      arrow = "↑";
+      treeCopy[newIndex] = arrow;
+    }
+  } else if (move === "down") {
     newIndex = index + gridSize;
-    
-  }
-  else if(move == "left"){
-    tree[index - 1] = "←";
+    if (treeCopy[newIndex] === 0) {
+      arrow = "↓";
+      treeCopy[newIndex] = arrow;
+    }
+  } else if (move === "left") {
     newIndex = index - 1;
-    
-  }
-  else if(move == "right"){
-    tree[index + 1] = "→";
+    if (treeCopy[newIndex] === 0) {
+      arrow = "←";
+      treeCopy[newIndex] = arrow;
+    }
+  } else if (move === "right") {
     newIndex = index + 1;
+    if (treeCopy[newIndex] === 0) {
+      arrow = "→";
+      treeCopy[newIndex] = arrow;
+    }
+  }
 
-  } 
-  return [tree, newIndex];
+  console.log(`Move ${move} from ${index} to ${newIndex}. Arrow: ${arrow || "(none)"}`);
+  console.log("New Tree:", [...treeCopy]);
+
+  return [treeCopy, newIndex];
 
 }
 
 
 export function validMoves(tree, index, gridSize){
   let moves = [];
-  if(((index - gridSize) >= 0) && (tree[index - gridSize] == 0)){
+  if(((index - gridSize) >= 0) && (typeof tree[index - gridSize] === "number")){
     moves.push("up");
 
   }
-  if(((index + gridSize) < (gridSize * gridSize)) && (tree[index + gridSize] == 0)){
+  if(((index + gridSize) < (gridSize * gridSize)) && (typeof tree[index + gridSize] === "number")){
     moves.push("down");
     
   }
-  if(((index % gridSize) != 0)  && (tree[index - 1] == 0)){
+  if(((index % gridSize) != 0)  && (typeof tree[index - 1] === "number")){
     moves.push("left");
     
   }
-  if(((index % gridSize) != (gridSize - 1)) && (tree[index + 1] == 0)){
+  if(((index % gridSize) != (gridSize - 1)) && (typeof tree[index + 1] === "number")){
     moves.push("right");
 
   } 

@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { validMoves, createTrees } from "./GeneratedTree";
+import { useState} from "react";
+import { validMoves, createNewTree } from "./GeneratedTree";
 
 const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
   const [counter, setCounter] = useState(1);
+  const [found, setFound] = useState();
 
   const drawCell = (index) => {
     setSelectedCells((prev) => {
@@ -22,31 +23,45 @@ const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
     }
   }
 
+  // Delay function
   function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  async function searchTree(startIndices, gridSize, iterations, tree) {
-    console.log(startIndices, iterations);
-    if (iterations == 0){
-      setSelectedCells([...tree]);
-      return;
-    }
-    const moves = validMoves(tree, startIndices[0], gridSize)
-    const [newTrees, newIndicies] = createTrees(tree, startIndices[0], moves, gridSize);
+  /*
+    DFS Implementation 
+   */
+  async function searchTree(startIndices, gridSize, iterations, tree, paths) {
+    const moves = validMoves(tree, startIndices[0], gridSize);
 
-    console.log(newTrees[0], newIndicies[0]);
-    for(let i = 0; i < newIndicies.length; i++){
-      searchTree([newIndicies[i]], gridSize, iterations - 1, newTrees[i]);
-      await delay(5000);
+    if(iterations === (gridSize * gridSize) - 1 || moves.length === 0){
+      if(paths.length + 1 === counter && !tree.includes(0)){
+        setSelectedCells([...tree]);
+        return true;
+      }
+      return false;
+    }
+
+    for(let i = 0; i < moves.length; i++){
+      const [newTree, newIndex] = createNewTree(tree, startIndices[0], moves[i], gridSize);
+
+      const newPaths = [...paths];
+      if(newTree[newIndex] === (newPaths[newPaths.length -1] + 1)){
+        newPaths.push(newPaths[newPaths.length -1] + 1);
+
+      }
+
+      const found = await searchTree([newIndex], gridSize, iterations + 1, newTree, newPaths);
+      if (found) return true;
 
     }
+    console.log("No solution");
+    return false;
     
-
   }
-
+  
   return (
-    <div className="flex flex-wrap w-50 select-none">
+    <div className="flex flex-wrap w-60 select-none">
       {[...Array(gridSize)].flatMap((_, rowIndex) =>
         [...Array(gridSize)].map((_, colIndex) => {
           const index = rowIndex * gridSize + colIndex;
@@ -60,7 +75,7 @@ const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
             >
               {isSelected !== 0 && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center z-0">
-                  {isSelected === "." ? (
+                  {isSelected === "↑" || isSelected === "↓" || isSelected === "←" || isSelected === "→" ? (
                     <div className="w-12 h-12 bg-green-500" />
                   ) : (
                     <div className="w-12 h-12 bg-red-500" />
@@ -73,7 +88,11 @@ const Board = ({ gridSize, selectedCells, setSelectedCells }) => {
         })
       )}
 
-      <button className="my-5 mx-auto " onClick={() => searchTree([startIndex], gridSize, 3, selectedCells)}>Start</button>
+      <button className="my-5 mx-auto " onClick={() => {
+        const result = searchTree([startIndex], gridSize, 0, selectedCells, [1])
+        setFound(result);
+        }}>Start</button>
+        
     </div>
   );
 };
