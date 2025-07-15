@@ -30,29 +30,29 @@ export function createNewTree(tree, index, move, gridSize){
     }
   }
 
-  console.log(`Move ${move} from ${index} to ${newIndex}. Arrow: ${arrow || "(none)"}`);
-  console.log("New Tree:", [...treeCopy]);
+  // console.log(`Move ${move} from ${index} to ${newIndex}. Arrow: ${arrow || "(none)"}`);
+  // console.log("New Tree:", [...treeCopy]);
 
   return [treeCopy, newIndex];
 
 }
 
 
-export function validMoves(tree, index, gridSize){
+export function validMoves(tree, index, gridSize, paths){
   let moves = [];
-  if(((index - gridSize) >= 0) && (typeof tree[index - gridSize] === "number")){
+  if(((index - gridSize) >= 0) && (typeof tree[index - gridSize] === "number" && !paths.includes(tree[index - gridSize]))){
     moves.push("up");
 
   }
-  if(((index + gridSize) < (gridSize * gridSize)) && (typeof tree[index + gridSize] === "number")){
+  if(((index + gridSize) < (gridSize * gridSize)) && (typeof tree[index + gridSize] === "number" && !paths.includes(tree[index + gridSize]))){
     moves.push("down");
     
   }
-  if(((index % gridSize) != 0)  && (typeof tree[index - 1] === "number")){
+  if(((index % gridSize) != 0)  && (typeof tree[index - 1] === "number" && !paths.includes(tree[index - 1]))){
     moves.push("left");
     
   }
-  if(((index % gridSize) != (gridSize - 1)) && (typeof tree[index + 1] === "number")){
+  if(((index % gridSize) != (gridSize - 1)) && (typeof tree[index + 1] === "number" && !paths.includes(tree[index + 1]))){
     moves.push("right");
 
   } 
