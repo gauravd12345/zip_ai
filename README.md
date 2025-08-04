@@ -1,5 +1,5 @@
 # Zip Puzzle Solver
-An algorithm that can solve the popular LinkedIn mobile game Zip in real-time. To elaborate, the goal of the game is to find a distinct path in a grid such that the path goes through all numbered squares in a consecutive order while also filling each non-numbered square. To play the game for yourself, check out https://www.linkedin.com/games/zip/. 
+An algorithm that can solve the popular LinkedIn mobile game Zip in real-time. The goal of this game is to find a distinct path in a grid such that the path goes through all numbered squares in a consecutive order while also filling each non-numbered square. To play the game for yourself, check out https://www.linkedin.com/games/zip/. 
 
 ## Examples:
 
